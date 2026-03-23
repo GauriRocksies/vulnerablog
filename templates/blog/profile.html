@@ -1,7 +1,10 @@
-{% extends 'base.html' %} {% load static %} {% load blog_extras %} {% block
-title %}{{ profile_user.display_name }} — VulneraBlog{% endblock %} {% block
-extra_css %}<link rel="stylesheet" href="{% static 'css/profile.css' %}" />{%
-endblock %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% load blog_extras %}
+<!-- ── Code formatter ──────────────────────── -->
+{% block title %} {{ profile_user.display_name }} — VulneraBlog{% endblock %}
+<!-- ── Code formatter ──────────────────────── -->
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}" />
+{% endblock %} {% block content %}
 <div class="profile-page">
   <!-- ── Profile Header ──────────────────────── -->
   <div class="profile-header">

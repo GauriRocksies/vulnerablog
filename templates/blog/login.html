@@ -29,7 +29,7 @@ VulneraBlog{%endblock%} {% block form_content %}
   </div>
 
   <div class="form-action-row">
-    <a href="#" class="forgot-link">Forgot Password?</a>
+    <a href="{% url 'password_reset' %}" class="forgot-link">Forgot Password?</a>
   </div>
 
   <button type="submit" class="btn-signin">Sign In</button>

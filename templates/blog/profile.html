@@ -34,7 +34,7 @@
         <a href="{% url 'edit_profile' %}" class="btn-edit-profile">
           ✏️ Edit Profile
         </a>
-        <a href="{% url 'edit_profile' %}" class="btn-settings">Settings</a>
+        
         {% else %}
         <button
           class="btn-follow {% if is_following %}following{% endif %}"
@@ -118,6 +118,57 @@
         >
       </div>
       {% endif %}
+
+      <!-- Friends Section -->
+{% if friends %}
+<div class="profile-widget">
+  <h4 class="profile-widget-title">Friends</h4>
+
+  {% for user in friends %}
+  <div class="following-item">
+    {% if user.avatar %}
+    <img src="{{ user.avatar.url }}" class="author-avatar-sm" />
+    {% else %}
+    <div class="author-avatar-sm author-avatar-sm--placeholder">
+      {{ user.display_name|first|upper }}
+    </div>
+    {% endif %}
+
+    <div class="following-info">
+      <a href="{% url 'profile' username=user.username %}" class="following-name">
+        @{{ user.username }}
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+<!--  Followers Section -->
+{% if followers %}
+<div class="profile-widget">
+  <h4 class="profile-widget-title">Followers</h4>
+
+  {% for user in followers %}
+  <div class="following-item">
+    {% if user.avatar %}
+    <img src="{{ user.avatar.url }}" class="author-avatar-sm" />
+    {% else %}
+    <div class="author-avatar-sm author-avatar-sm--placeholder">
+      {{ user.display_name|first|upper }}
+    </div>
+    {% endif %}
+
+    <div class="following-info">
+      <a href="{% url 'profile' username=user.username %}" class="following-name">
+        @{{ user.username }}
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
 
       <!-- About -->
       {% if profile_user.bio or profile_user.location %}

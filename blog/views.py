@@ -254,24 +254,40 @@ def bookmarks_view(request):
 
 @login_required
 def profile_view(request, username):
-    """View a user's public profile."""
+    """View a user's public profile with followers/following lists."""
     profile_user = get_object_or_404(User, username=username)
     posts = Post.objects.filter(author=profile_user).select_related('author').prefetch_related('tags', 'likes')
 
+    # Check if current user is following the profile user
     is_following = Follow.objects.filter(
         follower=request.user,
         following=profile_user
     ).exists()
 
+    # Get followers (people following this user)
+    followers_list = Follow.objects.filter(
+        following=profile_user
+    ).select_related('follower').order_by('-created_at')[:8]
+
+    # Get following (people this user follows)
     following_list = Follow.objects.filter(
         follower=profile_user
-    ).select_related('following')[:4]
+    ).select_related('following').order_by('-created_at')[:8]
+
+    # Get counts
+    followers_count = Follow.objects.filter(following=profile_user).count()
+    following_count = Follow.objects.filter(follower=profile_user).count()
+    posts_count = posts.count()
 
     context = {
         'profile_user': profile_user,
         'posts': posts,
         'is_following': is_following,
+        'followers_list': followers_list,
         'following_list': following_list,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'posts_count': posts_count,
         'is_own_profile': request.user == profile_user,
     }
     return render(request, 'blog/profile.html', context)

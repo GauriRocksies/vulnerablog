@@ -1,14 +1,10 @@
-{% extends 'base.html' %} {% load static %} {% load blog_extras %}
-<!-- ── Code formatter ──────────────────────── -->
-{% block title %} {{ profile_user.display_name }} — VulneraBlog{% endblock %}
-<!-- ── Code formatter ──────────────────────── -->
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}" />
-{% endblock %} {% block content %}
-<div class="profile-page">
-  <!-- ── Profile Header ──────────────────────── -->
+{% extends 'base.html' %} {% load static %} {% block title %}{{
+profile_user.display_name }} — VulneraBlog{% endblock %} {% block content %}
+<div class="profile-container">
+  <!-- Profile Header -->
   <div class="profile-header">
-    <div class="profile-avatar-wrapper">
+    <div class="profile-header-content">
+      <!-- Avatar -->
       {% if profile_user.avatar %}
       <img
         src="{{ profile_user.avatar.url }}"
@@ -20,286 +16,537 @@
         {{ profile_user.display_name|first|upper }}
       </div>
       {% endif %}
-    </div>
 
-    <div class="profile-info">
-      <h1 class="profile-name">{{ profile_user.display_name }}</h1>
-      <p class="profile-user-id">USER ID: {{ profile_user.user_id_code }}</p>
-      {% if profile_user.role %}
-      <p class="profile-role">{{ profile_user.role }}</p>
-      {% endif %}
+      <!-- User info -->
+      <div class="profile-info">
+        <h1 class="profile-name">{{ profile_user.display_name }}</h1>
+        <p class="profile-username">@{{ profile_user.username }}</p>
+        {% if profile_user.bio %}
+        <p class="profile-bio">{{ profile_user.bio }}</p>
+        {% endif %}
 
-      <div class="profile-actions">
-        {% if is_own_profile %}
-        <a href="{% url 'edit_profile' %}" class="btn-edit-profile">
-          ✏️ Edit Profile
-        </a>
-        
-        {% else %}
+        <!-- Follow Stats -->
+        <div class="profile-stats">
+          <div class="stat-item">
+            <span class="stat-label">Posts</span>
+            <span class="stat-value">{{ posts_count }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Followers</span>
+            <span class="stat-value">{{ followers_count }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Following</span>
+            <span class="stat-value">{{ following_count }}</span>
+          </div>
+        </div>
+
+        <!-- Follow Button -->
+        {% if not is_own_profile %}
         <button
           class="btn-follow {% if is_following %}following{% endif %}"
           id="followBtn"
-          data-url="{% url 'follow_user' username=profile_user.username %}"
-          data-username="{{ profile_user.username }}"
         >
           {% if is_following %}Following{% else %}Follow{% endif %}
         </button>
         {% endif %}
       </div>
     </div>
-
-    <div class="profile-stats">
-      <div class="stat-item">
-        <span class="stat-value" id="followersCount"
-          >{{ profile_user.followers_count|format_count }}</span
-        >
-        <span class="stat-label">FOLLOWERS</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-value"
-          >{{ profile_user.following_count|format_count }}</span
-        >
-        <span class="stat-label">FOLLOWING</span>
-      </div>
-    </div>
   </div>
 
-  <!-- ── Profile Body ─────────────────────────── -->
-  <div class="profile-body">
-    <!-- Left sidebar -->
-    <aside class="profile-sidebar">
-      <!-- Following list -->
-      {% if following_list %}
-      <div class="profile-widget">
-        <h4 class="profile-widget-title">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-          </svg>
-          Following
-        </h4>
-        {% for follow in following_list %}
-        <div class="following-item">
-          {% if follow.following.avatar %}
-          <img
-            src="{{ follow.following.avatar.url }}"
-            alt="{{ follow.following.display_name }}"
-            class="author-avatar-sm"
-          />
-          {% else %}
-          <div class="author-avatar-sm author-avatar-sm--placeholder">
-            {{ follow.following.display_name|first|upper }}
-          </div>
-          {% endif %}
-          <div class="following-info">
-            <a
-              href="{% url 'profile' username=follow.following.username %}"
-              class="following-name"
-              >@{{ follow.following.username }}</a
-            >
-            {% if follow.following.role %}
-            <span class="following-role"
-              >{{ follow.following.role|upper }}</span
-            >
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
-        <a href="#" class="view-all-link"
-          >View all {{ profile_user.following_count }} users</a
-        >
-      </div>
-      {% endif %}
-
-      <!-- Friends Section -->
-{% if friends %}
-<div class="profile-widget">
-  <h4 class="profile-widget-title">Friends</h4>
-
-  {% for user in friends %}
-  <div class="following-item">
-    {% if user.avatar %}
-    <img src="{{ user.avatar.url }}" class="author-avatar-sm" />
-    {% else %}
-    <div class="author-avatar-sm author-avatar-sm--placeholder">
-      {{ user.display_name|first|upper }}
-    </div>
-    {% endif %}
-
-    <div class="following-info">
-      <a href="{% url 'profile' username=user.username %}" class="following-name">
-        @{{ user.username }}
-      </a>
-    </div>
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
-
-
-<!--  Followers Section -->
-{% if followers %}
-<div class="profile-widget">
-  <h4 class="profile-widget-title">Followers</h4>
-
-  {% for user in followers %}
-  <div class="following-item">
-    {% if user.avatar %}
-    <img src="{{ user.avatar.url }}" class="author-avatar-sm" />
-    {% else %}
-    <div class="author-avatar-sm author-avatar-sm--placeholder">
-      {{ user.display_name|first|upper }}
-    </div>
-    {% endif %}
-
-    <div class="following-info">
-      <a href="{% url 'profile' username=user.username %}" class="following-name">
-        @{{ user.username }}
-      </a>
-    </div>
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
-
-      <!-- About -->
-      {% if profile_user.bio or profile_user.location %}
-      <div class="profile-widget">
-        <h4 class="profile-widget-title">About</h4>
-        {% if profile_user.bio %}
-        <p class="profile-bio">{{ profile_user.bio }}</p>
-        {% endif %} {% if profile_user.location %}
-        <p class="profile-location">📍 {{ profile_user.location }}</p>
-        {% endif %} {% if profile_user.website %}
-        <a
-          href="{{ profile_user.website }}"
-          target="_blank"
-          class="profile-website"
-          >🔗 {{ profile_user.website }}</a
-        >
-        {% endif %}
-      </div>
-      {% endif %}
-    </aside>
-
-    <!-- Main content: posts -->
-    <main class="profile-main">
-      <div class="profile-posts-header">
-        <h3 class="profile-posts-title">Recent Posts</h3>
-        <div class="post-view-toggle">
-          <button class="view-btn active" id="gridViewBtn" title="Grid view">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-              <rect x="14" y="14" width="7" height="7" />
-            </svg>
-          </button>
-          <button class="view-btn" id="listViewBtn" title="List view">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="8" y1="6" x2="21" y2="6" />
-              <line x1="8" y1="12" x2="21" y2="12" />
-              <line x1="8" y1="18" x2="21" y2="18" />
-              <line x1="3" y1="6" x2="3.01" y2="6" />
-              <line x1="3" y1="12" x2="3.01" y2="12" />
-              <line x1="3" y1="18" x2="3.01" y2="18" />
-            </svg>
-          </button>
-        </div>
-      </div>
+  <!-- Main Content Grid -->
+  <div class="profile-layout">
+    <!-- Posts Column -->
+    <div class="profile-main">
+      <h2 class="section-title">Posts by {{ profile_user.display_name }}</h2>
 
       {% if posts %}
-      <div class="profile-posts-grid" id="profilePostsGrid">
+      <div class="posts-grid">
         {% for post in posts %}
-        <article class="profile-post-card">
+        <div class="post-card">
           {% if post.cover_image %}
-          <a
-            href="{% url 'post_detail' pk=post.pk %}"
-            class="profile-post-img-link"
-          >
-            <img
-              src="{{ post.cover_image.url }}"
-              alt="{{ post.title }}"
-              class="profile-post-img"
-              loading="lazy"
-            />
-          </a>
+          <img
+            src="{{ post.cover_image.url }}"
+            alt="{{ post.title }}"
+            class="post-card-img"
+          />
           {% else %}
-          <a
-            href="{% url 'post_detail' pk=post.pk %}"
-            class="profile-post-img-link"
-          >
-            <div class="profile-post-img profile-post-img--placeholder">
-              {{ post.get_category_display|upper }}
-            </div>
-          </a>
+          <div class="post-card-img post-card-img--placeholder"></div>
           {% endif %}
-          <div class="profile-post-info">
-            <span class="post-category-tag"
-              >{{ post.get_category_display|upper }}</span
+
+          <div class="post-card-content">
+            <a href="{% url 'post_detail' pk=post.pk %}" class="post-card-title"
+              >{{ post.title }}</a
             >
-            <h3 class="profile-post-title">
-              <a href="{% url 'post_detail' pk=post.pk %}">{{ post.title }}</a>
-            </h3>
-            <p class="profile-post-excerpt">
-              {{ post.content|truncatewords:15 }}
-            </p>
-            <div class="profile-post-footer">
-              <span class="profile-post-date"
-                >{{ post.created_at|date:"M d, Y"|upper }}</span
-              >
-              <span class="profile-post-comments"
-                >💬 {{ post.comments_count }}</span
-              >
+            <p class="post-card-meta">{{ post.created_at|date:"M d, Y" }}</p>
+            <p class="post-card-excerpt">{{ post.content|truncatewords:20 }}</p>
+
+            <div class="post-card-actions">
+              <span class="post-card-stat">👍 {{ post.likes_count }}</span>
+              <span class="post-card-stat">💬 {{ post.comments_count }}</span>
             </div>
           </div>
-        </article>
+        </div>
         {% endfor %}
       </div>
-
-      <div class="discover-older">
-        <span>DISCOVER OLDER ENTRIES</span>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <line x1="5" y1="12" x2="19" y2="12" />
-          <polyline points="12,5 19,12 12,19" />
-        </svg>
-      </div>
-
       {% else %}
-      <div class="empty-state">
-        <p class="empty-state-title">No posts yet.</p>
-        {% if is_own_profile %}
-        <a href="{% url 'upload_post' %}" class="btn-upload-first"
-          >Publish your first post →</a
+      <p class="empty-state">No posts yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar: Followers & Following -->
+    <aside class="profile-sidebar">
+      <!-- Followers Section -->
+      <div class="sidebar-widget">
+        <h3 class="widget-title">Followers ({{ followers_count }})</h3>
+
+        {% if followers_list %}
+        <div class="user-list">
+          {% for follow in followers_list %}
+          <div class="user-list-item">
+            {% if follow.follower.avatar %}
+            <img
+              src="{{ follow.follower.avatar.url }}"
+              alt="{{ follow.follower.display_name }}"
+              class="user-list-avatar"
+            />
+            {% else %}
+            <div class="user-list-avatar user-list-avatar--placeholder">
+              {{ follow.follower.display_name|first|upper }}
+            </div>
+            {% endif %}
+
+            <div class="user-list-info">
+              <a
+                href="{% url 'profile' username=follow.follower.username %}"
+                class="user-list-name"
+              >
+                {{ follow.follower.display_name }}
+              </a>
+              <p class="user-list-username">@{{ follow.follower.username }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% if followers_count > 8 %}
+        <a href="#" class="view-all-link"
+          >View all {{ followers_count }} followers</a
         >
+        {% endif %} {% else %}
+        <p class="empty-list">No followers yet.</p>
         {% endif %}
       </div>
-      {% endif %}
-    </main>
+
+      <!-- Following Section -->
+      <div class="sidebar-widget">
+        <h3 class="widget-title">Following ({{ following_count }})</h3>
+
+        {% if following_list %}
+        <div class="user-list">
+          {% for follow in following_list %}
+          <div class="user-list-item">
+            {% if follow.following.avatar %}
+            <img
+              src="{{ follow.following.avatar.url }}"
+              alt="{{ follow.following.display_name }}"
+              class="user-list-avatar"
+            />
+            {% else %}
+            <div class="user-list-avatar user-list-avatar--placeholder">
+              {{ follow.following.display_name|first|upper }}
+            </div>
+            {% endif %}
+
+            <div class="user-list-info">
+              <a
+                href="{% url 'profile' username=follow.following.username %}"
+                class="user-list-name"
+              >
+                {{ follow.following.display_name }}
+              </a>
+              <p class="user-list-username">@{{ follow.following.username }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% if following_count > 8 %}
+        <a href="#" class="view-all-link"
+          >View all {{ following_count }} following</a
+        >
+        {% endif %} {% else %}
+        <p class="empty-list">Not following anyone yet.</p>
+        {% endif %}
+      </div>
+    </aside>
   </div>
 </div>
-{% endblock %} {% block extra_js %}
-<script src="{% static 'js/profile.js' %}"></script>
+
+<style>
+  /* Profile Container */
+  .profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  /* Profile Header */
+  .profile-header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .profile-header-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border-light);
+    flex-shrink: 0;
+  }
+
+  .profile-avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 40px;
+    color: var(--text-primary);
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .profile-name {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+  }
+
+  .profile-username {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .profile-bio {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    max-width: 500px;
+  }
+
+  /* Profile Stats */
+  .profile-stats {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 20px;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  /* Follow Button */
+  .btn-follow {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition:
+      opacity var(--transition),
+      background var(--transition);
+    font-size: 14px;
+  }
+
+  .btn-follow:hover {
+    opacity: 0.85;
+  }
+
+  .btn-follow.following {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+  }
+
+  /* Profile Layout */
+  .profile-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 48px;
+    align-items: start;
+  }
+
+  /* Posts Grid */
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .post-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition:
+      border-color var(--transition),
+      background var(--transition);
+  }
+
+  .post-card:hover {
+    border-color: var(--border-light);
+    background: var(--bg-card-hover);
+  }
+
+  .post-card-img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+  }
+
+  .post-card-img--placeholder {
+    background: linear-gradient(135deg, #0f2040, #1a3560);
+  }
+
+  .post-card-content {
+    padding: 16px;
+  }
+
+  .post-card-title {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    line-height: 1.4;
+    transition: color var(--transition);
+  }
+
+  .post-card-title:hover {
+    color: var(--accent);
+  }
+
+  .post-card-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .post-card-excerpt {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .post-card-actions {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Sidebar */
+  .profile-sidebar {
+    position: sticky;
+    top: calc(var(--navbar-h, 60px) + 20px);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .sidebar-widget {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+  }
+
+  .widget-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  /* User List */
+  .user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .user-list-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition);
+  }
+
+  .user-list-item:hover {
+    background: var(--bg-card-hover);
+  }
+
+  .user-list-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border-light);
+  }
+
+  .user-list-avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+
+  .user-list-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .user-list-name {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: color var(--transition);
+    margin-bottom: 2px;
+  }
+
+  .user-list-name:hover {
+    color: var(--accent);
+  }
+
+  .user-list-username {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .empty-list {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .view-all-link {
+    display: block;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 12px;
+    color: var(--accent);
+    transition: color var(--transition);
+  }
+
+  .view-all-link:hover {
+    color: var(--border-light);
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .profile-layout {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    .profile-sidebar {
+      position: static;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-container {
+      padding: 24px 16px;
+    }
+
+    .profile-header-content {
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+    }
+
+    .profile-name {
+      font-size: 1.5rem;
+    }
+
+    .profile-stats {
+      gap: 24px;
+    }
+
+    .posts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 {% endblock %}

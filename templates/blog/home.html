@@ -1,6 +1,6 @@
-{% extends 'base.html' %} {% load static %} {% load blog_extras %} {% block
-extra_css %} <link rel="stylesheet" href="{% static 'css/home.css' %}" />{%
-endblock %} {%block content %}
+{% extends 'base.html' %} {% load static %} {% load blog_extras %} 
+{% block extra_css %} <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+{%endblock %} {%block content %}
 <div class="home-container">
   {% if query %}
   <p class="search-result-label">Results for: <strong>"{{ query }}"</strong></p>

@@ -3,7 +3,7 @@
    ============================================ */
 
 .home-container {
-    max-width: 1200px;
+    max-width: 720px;
     margin: 0 auto;
     padding: 36px 24px 48px;
 }
@@ -65,10 +65,9 @@
 /* ── Post grid ───────────────────────────────── */
 .post-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 24px;
 }
-
 /* ── Post card ───────────────────────────────── */
 .post-card {
     background: var(--bg-card);

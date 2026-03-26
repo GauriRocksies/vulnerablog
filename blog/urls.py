@@ -38,8 +38,8 @@ urlpatterns = [
 
     # Main pages
     path('', views.home_view, name='home'),
-    path('explore/', views.explore_view, name='explore'),
-    path('bookmarks/', views.bookmarks_view, name='bookmarks'),
+    # path('explore/', views.explore_view, name='explore'),
+    # path('bookmarks/', views.bookmarks_view, name='bookmarks'),
 
     # Posts
     path('post/<int:pk>/', views.post_detail_view, name='post_detail'),
